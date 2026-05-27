@@ -1,50 +1,51 @@
 import ScrollReveal from './ScrollReveal.jsx'
+import { cardStyle } from '../constants/styles.js'
 
 const features = [
   {
     title: 'Core Sales Areas',
     text: 'Cars and trucks, agricultural machinery and equipment, automotive parts, and hand power tools.',
     icon: (
-      <svg viewBox="0 0 32 32" fill="none">
+      <>
         <path d="M7 23h18" />
         <path d="M9 23V12l7-4 7 4v11" />
         <path d="M13 23v-5h6v5" />
-      </svg>
+      </>
     ),
   },
   {
     title: 'Energy Portfolio',
     text: 'Solar panels, battery storage systems, hybrid inverters, and generators for modern energy projects.',
     icon: (
-      <svg viewBox="0 0 32 32" fill="none">
+      <>
         <path d="M5 20h14" />
         <path d="M8 20l3-8h8l3 8" />
         <path d="M22 10v12" />
         <path d="M25 14v8" />
         <path d="M28 12v10" />
-      </svg>
+      </>
     ),
   },
   {
     title: 'Trusted Suppliers',
     text: 'Partnerships include John Deere, New Holland, Volvo, Scania, VAG Group, Renault, and Toyota.',
     icon: (
-      <svg viewBox="0 0 32 32" fill="none">
+      <>
         <path d="M16 5l9 4v6c0 6-4 10-9 12-5-2-9-6-9-12V9l9-4Z" />
         <path d="m12.5 16 2.5 2.5 4.5-5" />
-      </svg>
+      </>
     ),
   },
   {
     title: 'International Growth',
     text: 'Cooperation with Hengyang Global Power Technology Co., Ltd. and Ningbo Deye ESS Technology Co., Ltd., with China expansion planned.',
     icon: (
-      <svg viewBox="0 0 32 32" fill="none">
+      <>
         <path d="M16 6v20" />
         <path d="M6 16h20" />
         <path d="M9 9c2 2 3.5 5 3.5 7S11 21 9 23" />
         <path d="M23 9c-2 2-3.5 5-3.5 7s1.5 5 3.5 7" />
-      </svg>
+      </>
     ),
   },
 ]
@@ -128,9 +129,7 @@ export default function AboutShowcase() {
               alignItems: 'start',
               padding: 'clamp(16px, 2vw, 24px)',
               borderRadius: '20px',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.62) 0%, rgba(252,248,239,0.72) 100%)',
-              border: '1px solid rgba(194,169,115,0.16)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.70), 0 14px 26px rgba(132,104,57,0.08)',
+              ...cardStyle,
               borderLeft: 'none',
             }}
           >
@@ -159,15 +158,16 @@ export default function AboutShowcase() {
               }}
             >
               <svg
-                viewBox={f.icon.props.viewBox}
+                viewBox="0 0 32 32"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{ width: '22px', height: '22px' }}
+                aria-hidden="true"
               >
-                {f.icon.props.children}
+                {f.icon}
               </svg>
             </div>
             <div>

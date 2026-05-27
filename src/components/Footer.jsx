@@ -1,4 +1,5 @@
 import ScrollReveal from './ScrollReveal.jsx'
+import { COMPANY } from '../constants/company.js'
 
 export default function Footer() {
   return (
@@ -40,7 +41,7 @@ export default function Footer() {
               <div className="flex items-center gap-2.5 mb-4">
                 <span style={{ fontSize: '26px', color: '#6c8a37' }}>✺</span>
                 <span className="font-bold" style={{ fontSize: '21px', color: '#f4f0df' }}>
-                  Sun Light Industries Ltd.
+                  {COMPANY.name}
                 </span>
               </div>
               <p style={{ maxWidth: '520px', fontSize: '15px', lineHeight: 1.65, color: 'rgba(244,240,223,0.72)' }}>
@@ -96,11 +97,11 @@ export default function Footer() {
               Contact
             </h4>
             <a
-              href="mailto:office@SunLightIndustriesLtd.com"
+              href={`mailto:${COMPANY.email}`}
               className="footer-link transition-all duration-300 break-all"
               style={{ fontSize: '15px', lineHeight: 1.5, color: 'rgba(244,240,223,0.84)' }}
             >
-              office@SunLightIndustriesLtd.com
+              {COMPANY.email}
             </a>
           </div>
         </div>

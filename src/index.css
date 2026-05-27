@@ -208,6 +208,17 @@
   width: 100%;
 }
 
+/* ── HEADER QUOTE BUTTON ────────────────────────── */
+.header-quote-btn {
+  background: #5e7f34;
+  box-shadow: 0 8px 16px rgba(55,76,28,0.18);
+}
+
+.header-quote-btn:hover {
+  background: #6b8f3c;
+  box-shadow: 0 12px 22px rgba(55,76,28,0.24);
+}
+
 /* ── BUTTON SHINE ───────────────────────────────── */
 .quote-btn,
 .cta-btn,

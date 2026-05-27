@@ -64,23 +64,13 @@ export default function Header() {
         <div className="flex items-center gap-3">
           <a
             href="/#contact"
-            className="hidden md:inline-flex quote-btn btn-shine items-center justify-center rounded-full font-bold text-white transition-all duration-300 hover:-translate-y-0.5"
+            className="hidden md:inline-flex quote-btn btn-shine header-quote-btn items-center justify-center rounded-full font-bold text-white transition-all duration-300 hover:-translate-y-0.5"
             style={{
               minHeight: '46px',
               padding: '0 22px',
-              background: '#5e7f34',
               fontSize: '12px',
               letterSpacing: '0.3px',
-              boxShadow: '0 8px 16px rgba(55,76,28,0.18)',
               whiteSpace: 'nowrap',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = '#6b8f3c'
-              e.currentTarget.style.boxShadow = '0 12px 22px rgba(55,76,28,0.24)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = '#5e7f34'
-              e.currentTarget.style.boxShadow = '0 8px 16px rgba(55,76,28,0.18)'
             }}
           >
             REQUEST A QUOTE

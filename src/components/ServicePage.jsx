@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
 import ScrollReveal from './ScrollReveal.jsx'
+import { cardStyle } from '../constants/styles.js'
 
-const cardStyle = {
-  background: 'linear-gradient(145deg, rgba(255,255,255,0.64) 0%, rgba(253,249,240,0.74) 46%, rgba(244,236,221,0.82) 100%)',
-  border: '1px solid rgba(194,169,115,0.18)',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.78), 0 14px 26px rgba(132,104,57,0.08)',
+function parseTitle(html) {
+  return html.split(/<br\s*\/?>/i).flatMap((part, i, arr) => {
+    const text = part.replace(/&amp;/g, '&').trim()
+    return i < arr.length - 1 ? [text, <br key={i} />] : [text]
+  })
 }
 
 export default function ServicePage({ data }) {
@@ -45,8 +47,9 @@ export default function ServicePage({ data }) {
               lineHeight: 1.02,
               color: '#171717',
             }}
-            dangerouslySetInnerHTML={{ __html: hero.titleHtml }}
-          />
+          >
+            {parseTitle(hero.titleHtml)}
+          </h1>
 
           <p
             style={{

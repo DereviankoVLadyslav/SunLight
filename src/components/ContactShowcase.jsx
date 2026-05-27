@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { init, send } from '@emailjs/browser'
 import ScrollReveal from './ScrollReveal.jsx'
+import { cardStyle, inputStyle } from '../constants/styles.js'
+import { COMPANY } from '../constants/company.js'
 
 const EMAILJS_CONFIG = {
   publicKey: '',
   serviceId: '',
   templateId: '',
   autoReplyTemplateId: '',
-  toEmail: 'office@SunLightIndustriesLtd.com',
 }
 
 const hasConfig = ['publicKey', 'serviceId', 'templateId'].every(k => {
@@ -15,16 +16,78 @@ const hasConfig = ['publicKey', 'serviceId', 'templateId'].every(k => {
   return typeof v === 'string' && v.trim() !== '' && !v.startsWith('YOUR_')
 })
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function validate(form) {
+  const errors = {}
+  if (!form.name.trim()) errors.name = 'Name is required'
+  if (!form.email.trim()) errors.email = 'Email is required'
+  else if (!EMAIL_RE.test(form.email)) errors.email = 'Enter a valid email address'
+  if (!form.message.trim()) errors.message = 'Message is required'
+  return errors
+}
+
+const contactItems = [
+  {
+    title: 'Address',
+    content: COMPANY.address,
+    href: null,
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 27s8-6.8 8-14a8 8 0 1 0-16 0c0 7.2 8 14 8 14Z"/><circle cx="16" cy="13" r="3.2"/>
+      </svg>
+    ),
+  },
+  {
+    title: 'Phone',
+    content: COMPANY.phone,
+    href: `tel:${COMPANY.phone}`,
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 6h4l2 5-2.5 2.5a19.2 19.2 0 0 0 6 6L21 17l5 2v4a2 2 0 0 1-2 2C14.6 25 7 17.4 7 8a2 2 0 0 1 2-2Z"/>
+      </svg>
+    ),
+  },
+  {
+    title: 'Email',
+    content: COMPANY.email,
+    href: `mailto:${COMPANY.email}`,
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="8" width="22" height="16" rx="2"/><path d="m7 10 9 7 9-7"/>
+      </svg>
+    ),
+  },
+]
+
 export default function ContactShowcase() {
   const [form, setForm] = useState({ name: '', email: '', company: '', phone: '', message: '' })
+  const [errors, setErrors] = useState({})
   const [consent, setConsent] = useState(false)
   const [status, setStatus] = useState({ msg: '', type: '' })
   const [loading, setLoading] = useState(false)
   const charCount = form.message.length
 
+  function handleChange(e) {
+    const { name, value } = e.target
+    setForm(p => ({ ...p, [name]: value }))
+    if (errors[name]) setErrors(p => ({ ...p, [name]: undefined }))
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!consent) return
+
+    const errs = validate(form)
+    if (Object.keys(errs).length) {
+      setErrors(errs)
+      return
+    }
+    setErrors({})
+
+    if (!consent) {
+      setStatus({ msg: 'Please accept the data processing consent to continue.', type: 'error' })
+      return
+    }
 
     if (!hasConfig) {
       setStatus({ msg: 'EmailJS keys in src/components/ContactShowcase.jsx still need to be configured.', type: 'error' })
@@ -40,7 +103,7 @@ export default function ContactShowcase() {
       company: form.company, phone: form.phone,
       message: form.message,
       subject: `New website inquiry from ${form.name || 'Website visitor'}`,
-      to_email: EMAILJS_CONFIG.toEmail,
+      to_email: COMPANY.email,
       submitted_at: new Date().toLocaleString(),
       page_url: window.location.href,
     }
@@ -52,10 +115,10 @@ export default function ContactShowcase() {
       if (EMAILJS_CONFIG.autoReplyTemplateId?.trim()) {
         await send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.autoReplyTemplateId, {
           to_name: form.name, to_email: form.email,
-          reply_to: EMAILJS_CONFIG.toEmail,
+          reply_to: COMPANY.email,
           company: form.company, phone: form.phone,
           message_preview: form.message,
-          website_name: 'Sun Light Industries Ltd.',
+          website_name: COMPANY.name,
         })
       }
 
@@ -63,25 +126,17 @@ export default function ContactShowcase() {
       setConsent(false)
       setStatus({ msg: 'Thank you. Your message has been sent successfully.', type: 'success' })
     } catch {
-      setStatus({ msg: 'Sorry, something went wrong. Please email us directly at office@SunLightIndustriesLtd.com.', type: 'error' })
+      setStatus({ msg: `Sorry, something went wrong. Please email us directly at ${COMPANY.email}.`, type: 'error' })
     } finally {
       setLoading(false)
     }
   }
 
-  const inputStyle = {
-    width: '100%',
-    border: '1px solid rgba(194,169,115,0.16)',
-    borderRadius: '14px',
-    background: 'linear-gradient(90deg, rgba(255,255,255,0.54) 0%, rgba(252,247,238,0.74) 100%)',
-    color: '#46361e',
-    fontFamily: 'inherit',
-    fontSize: 'inherit',
-    padding: '14px 16px',
-    outline: 'none',
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
-    transition: 'border-color 0.4s, box-shadow 0.4s',
-  }
+  const fieldStyle = (id) => ({
+    ...inputStyle,
+    minHeight: '52px',
+    ...(errors[id] && { borderColor: 'rgba(193,80,71,0.5)' }),
+  })
 
   return (
     <section
@@ -124,43 +179,12 @@ export default function ContactShowcase() {
         </h3>
 
         <p style={{ marginTop: '16px', maxWidth: '610px', fontSize: 'clamp(14px, 1.1vw, 18px)', lineHeight: 1.6, color: 'rgba(67,54,33,0.86)' }}>
-          Reach out to Sun Light Industries Ltd. for trade inquiries, sourcing, logistics,
+          Reach out to {COMPANY.name} for trade inquiries, sourcing, logistics,
           industrial equipment, and solar energy solutions.
         </p>
 
         <div className="grid mt-5" style={{ gap: '14px' }}>
-          {[
-            {
-              title: 'Address',
-              content: 'Room A, 21/F., Gaylord Commercial Building,\n114–118 Lockhart Road, Wan Chai, HK',
-              href: null,
-              icon: (
-                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 27s8-6.8 8-14a8 8 0 1 0-16 0c0 7.2 8 14 8 14Z"/><circle cx="16" cy="13" r="3.2"/>
-                </svg>
-              ),
-            },
-            {
-              title: 'Phone',
-              content: '+36202489278',
-              href: 'tel:+36202489278',
-              icon: (
-                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 6h4l2 5-2.5 2.5a19.2 19.2 0 0 0 6 6L21 17l5 2v4a2 2 0 0 1-2 2C14.6 25 7 17.4 7 8a2 2 0 0 1 2-2Z"/>
-                </svg>
-              ),
-            },
-            {
-              title: 'Email',
-              content: 'office@SunLightIndustriesLtd.com',
-              href: 'mailto:office@SunLightIndustriesLtd.com',
-              icon: (
-                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="5" y="8" width="22" height="16" rx="2"/><path d="m7 10 9 7 9-7"/>
-                </svg>
-              ),
-            },
-          ].map(({ title, content, href, icon }, i) => (
+          {contactItems.map(({ title, content, href, icon }, i) => (
             <ScrollReveal
               key={title}
               effect="reveal-left"
@@ -170,8 +194,7 @@ export default function ContactShowcase() {
                 display: 'grid', gridTemplateColumns: '56px 1fr', gap: '14px', alignItems: 'start',
                 padding: 'clamp(14px, 1.6vw, 24px)',
                 borderRadius: '22px',
-                background: 'linear-gradient(145deg, rgba(255,255,255,0.64) 0%, rgba(253,249,240,0.74) 46%, rgba(244,236,221,0.82) 100%)',
-                border: '1px solid rgba(194,169,115,0.18)',
+                ...cardStyle,
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.78), 0 18px 34px rgba(132,104,57,0.10)',
                 transition: 'transform 0.48s, box-shadow 0.48s',
                 cursor: 'default',
@@ -211,8 +234,7 @@ export default function ContactShowcase() {
           padding: 'clamp(16px, 2.5vw, 34px)',
           borderRadius: '22px',
           zIndex: 1,
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.64) 0%, rgba(253,249,240,0.74) 46%, rgba(244,236,221,0.82) 100%)',
-          border: '1px solid rgba(194,169,115,0.18)',
+          ...cardStyle,
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.78), 0 18px 34px rgba(132,104,57,0.10)',
         }}
       >
@@ -220,23 +242,25 @@ export default function ContactShowcase() {
           {/* Row 1 */}
           <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: '16px' }}>
             {[
-              { id: 'name', label: 'Full Name', placeholder: 'Your full name', type: 'text', required: true },
-              { id: 'email', label: 'Email', placeholder: 'Your email address', type: 'email', required: true },
+              { id: 'name', label: 'Full Name', placeholder: 'Your full name', type: 'text' },
+              { id: 'email', label: 'Email', placeholder: 'Your email address', type: 'email' },
             ].map(f => (
               <div key={f.id} className="flex flex-col">
                 <label htmlFor={f.id} style={{ marginBottom: '8px', fontSize: '14px', fontWeight: 700, color: '#57452a' }}>
-                  {f.label} {f.required && <span style={{ color: '#c6a34a' }}>*</span>}
+                  {f.label} <span style={{ color: '#c6a34a' }}>*</span>
                 </label>
                 <input
                   id={f.id}
                   name={f.id}
                   type={f.type}
                   placeholder={f.placeholder}
-                  required={f.required}
                   value={form[f.id]}
-                  onChange={e => setForm(p => ({ ...p, [f.id]: e.target.value }))}
-                  style={{ ...inputStyle, minHeight: '52px' }}
+                  onChange={handleChange}
+                  style={fieldStyle(f.id)}
                 />
+                {errors[f.id] && (
+                  <span style={{ marginTop: '5px', fontSize: '12px', color: '#c15047' }}>{errors[f.id]}</span>
+                )}
               </div>
             ))}
           </div>
@@ -244,8 +268,8 @@ export default function ContactShowcase() {
           {/* Row 2 */}
           <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: '16px' }}>
             {[
-              { id: 'company', label: 'Company', placeholder: 'Company name', type: 'text', required: false },
-              { id: 'phone', label: 'Phone', placeholder: 'Your phone number', type: 'tel', required: false },
+              { id: 'company', label: 'Company', placeholder: 'Company name', type: 'text' },
+              { id: 'phone', label: 'Phone', placeholder: 'Your phone number', type: 'tel' },
             ].map(f => (
               <div key={f.id} className="flex flex-col">
                 <label htmlFor={f.id} style={{ marginBottom: '8px', fontSize: '14px', fontWeight: 700, color: '#57452a' }}>
@@ -257,7 +281,7 @@ export default function ContactShowcase() {
                   type={f.type}
                   placeholder={f.placeholder}
                   value={form[f.id]}
-                  onChange={e => setForm(p => ({ ...p, [f.id]: e.target.value }))}
+                  onChange={handleChange}
                   style={{ ...inputStyle, minHeight: '52px' }}
                 />
               </div>
@@ -274,12 +298,15 @@ export default function ContactShowcase() {
               name="message"
               placeholder="Tell us about your request"
               maxLength={500}
-              required
               value={form.message}
-              onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
-              style={{ ...inputStyle, minHeight: '160px', resize: 'vertical' }}
+              onChange={handleChange}
+              style={{ ...inputStyle, minHeight: '160px', resize: 'vertical', ...(errors.message && { borderColor: 'rgba(193,80,71,0.5)' }) }}
             />
-            <div className="flex justify-end mt-1.5">
+            <div className="flex items-center justify-between mt-1.5">
+              {errors.message
+                ? <span style={{ fontSize: '12px', color: '#c15047' }}>{errors.message}</span>
+                : <span />
+              }
               <span style={{ fontSize: '12px', color: 'rgba(92,73,42,0.58)' }}>{charCount}/500</span>
             </div>
           </div>
@@ -290,7 +317,6 @@ export default function ContactShowcase() {
               type="checkbox"
               checked={consent}
               onChange={e => setConsent(e.target.checked)}
-              required
               style={{ width: '18px', height: '18px', accentColor: '#8aa149', flexShrink: 0, marginTop: '2px' }}
             />
             <span>I agree to the processing of my personal data</span>
